@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="RequestDao">  
+	<insert id="insertRequest" parameterType="requestDTO">
+	  
+		<!-- 글 등록 -->
+		INSERT INTO request(
+		 req_num,
+		 req_pname,
+		 req_region,
+		 req_shop,
+		 req_content,
+		 req_date,
+		 req_point,
+		 req_uploadfile,
+		 req_filename,
+		 id)
+		VALUES(
+		request_seq.nextval,
+		#{req_pname},
+		#{req_region},
+		#{req_shop},
+		#{req_content},
+		SYSDATE,
+		#{req_point},
+		#{req_uploadfile},
+		#{req_filename},
+		#{id})
+	</insert>
+	
+	<!-- 글 전체 레코드 수 또는 검색 -->
+	<select id="selectRowCountRequest" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM request
+		<where>
+		<if test="keyword!='' and keyfield=='req_pname'">
+			req_pname like '%' || #{keyword} || '%'
+		</if>
+		<if test="keyword!='' and keyfield=='id'">
+			id like '%' || #{keyword} || '%'
+		</if>
+		<if test="keyword!='' and keyfield=='req_content'">
+			req_content like '%' || #{keyword} || '%'
+		</if>
+			<if test="keyword!='' and keyfield=='all'">
+			req_pname like '%' || #{keyword} || '%' or
+			id like '%' || #{keyword} || '%' or
+			req_content like '%' || #{keyword} || '%' or
+		</if>
+		</where>
+	</select>
+	
+	<!-- 글 목록 또는 검색 목록 -->
+	<select id="selectListRequest" parameterType="map" resultType="requestDTO">
+		SELECT
+			*
+		FROM (SELECT
+				a.*,
+				rownum rnum
+			  FROM (SELECT
+			      *
+			 	  FROM request
+					<where>
+						<if test="keyword!='' and keyfield=='title'">
+							req_pname like '%' || #{keyword} || '%'
+						</if>
+						<if test="keyword!='' and keyfield=='id'">
+							id like '%' || #{keyword} || '%'
+						</if>
+						<if test="keyword!='' and keyfield=='content'">
+							req_content like '%' || #{keyword} || '%'
+						</if>
+						<if test="keyword!='' and keyfield=='all'">
+							req_pname like '%' || #{keyword} || '%' or
+							id like '%' || #{keyword} || '%' or
+							req_content like '%' || #{keyword} || '%' or
+						</if>
+					</where>
+			 	  ORDER BY req_num DESC)a)
+		<![CDATA[
+		WHERE rnum >= #{start} AND rnum <= #{end}
+		]]>
+	</select>
+	
+	<!-- 글 상세 -->
+	<select id="selectRequest" parameterType="integer" resultType="requestDTO">
+		SELECT
+		   *
+		FROM request
+		WHERE req_num = #{num}
+	</select>
+	<!-- 게시판 상세 정보 -->
+	<select id="getRequest" parameterType="integer" resultType="requestDTO">
+		SELECT
+			*
+		FROM request
+		WHERE req_num = #{req_num}
+		
+	</select>	
+	<!-- 글 조회수 -->
+	<update id="updateHitRequest" parameterType="integer">
+		UPDATE request
+		SET req_hit = req_hit + 1
+		WHERE req_num = #{req_num}
+	</update>
+	<!-- 게시판 정보 수정 -->
+	<update id="updateRequest" parameterType="requestDTO">
+		UPDATE request
+		SET
+			req_pname=#{req_pname},
+			req_region=#{req_region},
+			req_shop=#{req_shop},
+			req_point=#{req_point},
+			req_content=#{req_content},
+			req_filename=#{req_filename},
+			req_uploadfile=#{req_uploadfile}
+			
+		WHERE req_num=#{req_num}
+	</update>
+	
+	<!-- 게시글 정보 삭제 -->
+	<delete id="deleteRequest" parameterType="integer">
+		DELETE FROM request
+		WHERE req_num=#{req_num}
+	</delete>	
+	
+	<!-- 댓글 -->
+	
+	<!-- 댓글 목록 -->
+ 	<select id="selectListReply" parameterType="map"
+ 	                     resultType="requestReplyDTO">
+ 		SELECT
+ 		   re_num,
+ 		   re_content,
+ 		   re_accept,
+ 		   TO_CHAR(re_date,'YYYY-MM-DD HH24:MI:SS') re_date,
+ 		   req_num,
+ 		   id
+ 		FROM (SELECT 
+ 		        a.*,
+ 		        rownum rnum
+ 		      FROM (SELECT
+ 		              *
+ 		            FROM reply_request
+ 		            WHERE req_num = #{req_num}
+ 		            ORDER BY re_num DESC)a)
+ 		<![CDATA[
+ 		WHERE rnum >= #{start} AND rnum <= #{end}
+ 		]]>                                 
+ 	</select>
+ 	<select id="selectRowCountReply" parameterType="map" resultType="integer">
+		SELECT 
+		  COUNT(*) 
+		FROM reply_request 
+		WHERE req_num=#{req_num}
+	</select>
+ 	<insert id="insertReply" parameterType="requestReplyDTO">
+	  INSERT INTO reply_request (
+	     re_num,
+	     re_content,
+	     re_date,
+	     req_num,
+	     id) 
+	  VALUES (
+	     reply_seq.nextval,
+	     #{re_content},
+	     SYSDATE,
+	     #{req_num},
+	     #{id})
+	</insert>
+ 	<update id="updateReply" parameterType="requestReplyDTO">
+		UPDATE reply_request 
+		SET 
+		  re_content=#{re_content}
+		  WHERE re_num=#{re_num}
+	</update>
+	<delete id="deleteReply" parameterType="integer">
+		DELETE FROM reply_request 
+		WHERE re_num=#{re_num}
+	</delete>
+	<delete id="deleteReplyByNum" parameterType="integer">
+		DELETE FROM reply_request 
+		WHERE req_num=#{req_num}
+	</delete>
+	
+	<!-- 주문 승인 -->
+	<update id="updateAccept" parameterType="integer">
+		UPDATE request 
+		SET 
+		  req_accept=1
+		  WHERE req_num=#{req_num}
+	</update>
+	<update id="updateAcceptReply" parameterType="integer">
+		UPDATE reply_request 
+		SET 
+		  re_accept=1
+		  WHERE re_num=#{re_num}
+	</update>
+	
+	<!-- 포인트 처리를 위한 id 구하기 -->
+	<select id="getIdFromRequest" parameterType="integer" resultType="requestDTO">
+		SELECT 
+		  id,req_point
+		FROM request 
+		WHERE req_num=#{req_num}
+	</select>
+	<select id="getIdFromReply" parameterType="integer" resultType="requestReplyDTO">
+		SELECT 
+		  *
+		FROM reply_request 
+		WHERE re_num=#{re_num}
+	</select>
+</mapper>
+
+
+
+
+
+
+
+
+
+

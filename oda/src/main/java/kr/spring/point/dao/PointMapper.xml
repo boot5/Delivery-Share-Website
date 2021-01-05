@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="PointDao">  
+	
+	<insert id="insertPoint" parameterType="pointDTO">
+	
+INSERT INTO point(
+		poi_num,
+		poi_kind,
+		poi_plpoint,
+		poi_mipoint,
+		poi_date,
+		id)
+	VALUES (
+		point_seq.nextval,
+		#{poi_kind},
+		#{poi_plpoint},
+		#{poi_mipoint},
+		SYSDATE,
+		#{id})
+	</insert>
+	
+	<select id="selectRowCountPoint" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM point
+		WHERE id = #{id}
+	</select>
+	
+	<select id="selectListPoint" parameterType="map" resultType="pointDTO">
+		SELECT
+		*
+		FROM (SELECT 
+				a.*,
+				rownum rnum
+				FROM (SELECT
+					*
+				FROM point
+				WHERE id = #{id}
+				ORDER BY poi_num DESC)a)
+		<![CDATA[
+		WHERE rnum >= #{start} AND rnum <= #{end}
+		]]>		
+	</select>
+	
+	<select id="selectPoint" parameterType="integer" resultType="pointDTO">
+	SELECT
+	*
+	FROM point
+	WHERE poi_num = #{poi_num}
+	</select>
+	
+	<select id="getTotalPoint" parameterType="string" resultType="pointDTO">
+	SELECT
+	   SUM(poi_plpoint) - SUM(poi_mipoint) poi_sum, id
+	FROM point
+    GROUP BY id
+    having id = #{id}
+	</select>
+
+</mapper>
+
+
+
+
+
+
+

@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="Message_requestDao">  
+	<insert id="insertRequestM" parameterType="message_requestDTO">
+	  
+		<!-- 글 등록 -->
+		INSERT INTO message_request(
+		 mess_num,
+		 id,
+		 mess_deli,
+		 mess_check,
+		 req_num,
+		 re_num,
+		 re_date
+		 )
+		VALUES(
+		message_seq.nextval,
+		#{id},
+		#{mess_deli},
+		#{mess_check},
+		#{req_num},
+		#{re_num},
+		SYSDATE
+		)
+	</insert>
+	
+	<!-- 글 전체 레코드 수 또는 검색 -->
+	<select id="selectRowCountRequestM" parameterType="map" resultType="integer">
+		SELECT
+			COUNT(*)
+		FROM message_request
+		WHERE mess_deli = #{mess_deli}
+		<if test="keyword!='' and keyfield=='re_num'">
+			AND re_num like '%' || #{keyword} || '%'
+		</if>
+		<if test="keyword!='' and keyfield=='id'">
+			AND id like '%' || #{keyword} || '%'
+		</if>
+		<if test="keyword!='' and keyfield=='mess_deli'">
+			AND mess_deli like '%' || #{keyword} || '%'
+		</if>
+			<if test="keyword!='' and keyfield=='all'">
+			AND (re_num like '%' || #{keyword} || '%' or
+			id like '%' || #{keyword} || '%' or
+			mess_deli like '%' || #{keyword} || '%')
+		</if>
+		
+	</select>
+	
+	<!-- 글 목록 또는 검색 목록 -->
+	<select id="selectListRequestM" parameterType="map" resultType="message_requestDTO">
+		SELECT
+			*
+		FROM (SELECT
+				a.*,
+				rownum rnum
+			  FROM (SELECT
+			      *
+			 	  FROM message_request
+				  WHERE mess_deli = #{mess_deli}
+					<if test="keyword!='' and keyfield=='re_num'">
+						AND re_num like '%' || #{keyword} || '%'
+					</if>
+					<if test="keyword!='' and keyfield=='id'">
+						AND id like '%' || #{keyword} || '%'
+					</if>
+					<if test="keyword!='' and keyfield=='mess_deli'">
+						AND mess_deli like '%' || #{keyword} || '%'
+					</if>
+						<if test="keyword!='' and keyfield=='all'">
+						AND (re_num like '%' || #{keyword} || '%' or
+						id like '%' || #{keyword} || '%' or
+						mess_deli like '%' || #{keyword} || '%')
+					</if>
+			 	  ORDER BY mess_num DESC)a)
+		<![CDATA[
+		WHERE rnum >= #{start} AND rnum <= #{end}
+		]]>
+	</select>
+	
+	<!-- 글 상세 -->
+	<select id="selectRequestM" parameterType="integer" resultType="message_requestDTO">
+		SELECT
+		   *
+		FROM message_request
+		WHERE mess_num = #{num}
+	</select>
+	<!-- 게시판 상세 정보 -->
+	<select id="getRequestM" parameterType="integer" resultType="message_requestDTO">
+		SELECT
+			*
+		FROM message_request
+		WHERE mess_num = #{mess_num}
+		
+	</select>	
+	
+	<!-- 게시판 정보 수정 -->
+	<update id="updateRequestM" parameterType="message_requestDTO">
+		UPDATE message_request
+		SET
+			mess_check=#{mess_check}
+		WHERE mess_num=#{mess_num}
+	</update>
+	
+	<!-- 게시글 정보 삭제 -->
+	<delete id="deleteRequestM" parameterType="integer">
+		DELETE FROM message_request
+		WHERE mess_num=#{mess_num}
+	</delete>	
+	
+	<!-- 미확인 메시지 갯수 -->
+	<select id="checkMessageCount" parameterType="string" resultType="integer">
+		SELECT 
+		  COUNT(*) 
+		FROM message_request 
+		WHERE mess_check=0 AND mess_deli = #{mess_deli}	
+	</select>	
+	
+	
+</mapper>
+
+
+
+
+
+
+
+
+
+

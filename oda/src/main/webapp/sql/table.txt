@@ -1,0 +1,131 @@
+/*고객 테이블 멤버*/
+create table member(
+id varchar2(12) not null,
+auth number(1) default 1 not null,
+constraint evmember_pk primary key (id)
+);
+create table member_detail(
+id varchar2(20) NOT NULL, /* 아이디 */
+name varchar2(15) NOT NULL,	    /* 이름 */
+passwd varchar2(15) NOT NULL,	/* 비밀번호 */
+phone varchar2(15),		 /* 전화번호 */
+email varchar2(50),			 /* 이메일*/
+zipcode varchar2(7),	    	/* 우편번호 */
+address1 varchar2(500),	    	/* 우편번호 */
+address2 varchar2(800),	    	/* 주소 */
+nkname varchar2(15) NOT NULL,	/* 닉네임 */
+reg_date date NOT NULL,			/* 가입일 */
+constraint member_detail_pk primary key (id),
+constraint member_detail_fk1 foreign key (id) references member (id)
+);
+
+/*주문요청 테이블*/ 
+create table request(
+req_num number not null, /* 게시글 번호 */
+req_pname varchar2(50), /* 주문할 제품명 */
+req_region varchar2(20), /* 서비스 지역 */
+req_shop varchar2(20), /* 주물할 가게명 */
+req_accept number(1) default 0 not null, /* 완료여부 미완료:0 완료:1 */ 
+req_point number(5), /* 주문 요청자의 포인트 */
+req_content clob not null, /* 내용(선호메뉴,방법,시간,포인트제시) */
+req_hit number(5) default 0 not null, /* 게시글 조회수 */
+req_date date, /* 날짜 */
+req_uploadfile blob, /* 파일업로드 */
+req_filename varchar2(100), /* 파일이름 */
+id varchar2(20), /* 아이디 */
+constraint request_pk primary key (req_num), 
+constraint request_fk1 foreign key (id) references member (id)
+);
+
+create sequence request_seq;
+
+create table reply_request(
+re_num number not null, /* 댓글 번호 */
+re_content varchar2(4000), /* 주문 요청 수행 내용-포인트,가격 */
+id varchar2(20), /* 아이디 */
+re_date date, /* 날짜 */
+req_num number not null,
+re_accept number(1) default 0 not null, /* 채택여부(미채택:0 채택:1) */
+constraint reply_request_pk primary key (re_num),
+constraint reply_request_fk1 foreign key (id) references member (id),
+constraint reply_request_fk2 foreign key (req_num) references request (req_num)
+);
+
+create sequence reply_seq;
+
+create table message_request(
+mess_num number not null, /* 주문 메시지 번호 */
+id varchar2(20), /* 주문자 아이디 */
+mess_deli varchar2(20), /* 배달자 아이디 */
+mess_check number(1), /* 수신여부(미수신:0 수신:1) */
+req_num number not null, /* 주문 번호 */
+re_num number not null, /* 주문한 사람의 댓글번호 */
+re_date date, /* 날짜 */
+constraint message_request_pk primary key (mess_num),
+constraint message_request_fk1 foreign key (id) references member (id),
+constraint message_request_fk2 foreign key (mess_deli) references member (id)
+);
+
+create sequence message_seq;
+
+/*블랙리스트*/
+create table blackList(		
+bla_num number not null,		/* 번호 */
+id varchar2(12) not null,		/*작성자아이디*/
+bla_id varchar2(12) not null,		/* 신고할 아이디*/
+bla_title varchar2(90) not null,	/* 신고글 제목*/
+bla_content clob not null,		/* 신고할내용*/
+bla_hit number(5) default 0 not null,	/* 조회수*/
+bla_date date not null,		/* 날짜*/
+constraint blackList_pk primary key (bla_num),
+constraint blackList_member_fk1 foreign key (id) references member (id)
+);
+
+create sequence black_seq;
+
+/*칭찬게시판*/
+create table compliment( /** 우수회원(칭찬)테이블**/
+com_num number not null, /** 게시글번호 **/
+id varchar2(15) not null,  /** 아이디**/
+com_deli varchar2(50), /** 배달자 아이디**/
+com_title varchar2(50), /**칭찬 게시글 제목 **/
+com_content clob, /**칭찬 게시글 내용 **/
+com_date date, /**게시글 등록시간 **/
+com_hit number(5) default 0 not null, /**조회수 **/
+constraint compliment_pk primary key(com_num),
+constraint compliment_fk1  foreign key (id) references member (id),
+constraint compliment_fk2  foreign key (com_deli) references member (id)
+);
+
+create sequence compliment_seq;
+
+/*공지사항 테이블*/
+create table notice (
+ noti_num number not null, 	       	         /* 게시글번호 */
+ noti_title varchar2(50),	     	         /*     제목     */
+ id varchar2(20),     	  	        /* 관리자아이디 */
+ noti_content clob,	        		   /*     내용     */
+ noti_date date,                           	 /*   작성날짜  */
+ noti_hit number(5) default 0 not null           /*    조회수    */
+);
+
+create sequence notice_seq;
+
+/*포인트 테이블*/
+create table point(    
+poi_num number not null,  /*번호*/
+poi_kind number(1),       /*포인트유형(포인트 충전:1,반환:2,적립:3,사용:4)*/
+poi_plpoint number(20),  /*적립 포인트*/
+poi_mipoint number(20),  /*사용 포인트*/
+poi_date date,       /*적립,사용날짜*/
+id varchar2(20) not null,    /*자신의 아이디*/
+constraint point_pk primary key (id) 
+);
+
+create sequence point_seq;
+
+
+
+
+
+

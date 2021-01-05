@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper   
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"   
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">  
+<mapper namespace="ComplimentDao">  
+    
+    <!-- 글 등록 -->
+    <insert id="insertCompliment" parameterType="complimentDTO">
+    	INSERT INTO compliment(
+    	  com_num,
+    	  com_title,
+    	 com_content,
+    	  com_date,
+    	  com_hit,
+    	  com_deli,
+    	  id)
+    	VALUES (
+    	  compliment_seq.nextval,
+    	  #{com_title},
+    	  #{com_content},
+    	  SYSDATE,
+    	  #{com_hit},
+    	  #{com_deli},
+    	  #{id})  
+    </insert>
+    
+    <!-- 글 전체 레코드 수 또는 검색 레코드 수 -->
+    <select id="selectRowCount" parameterType="map" resultType="integer">
+    	SELECT 
+    	   COUNT(*)
+    	FROM compliment
+    	<where>
+    		<if test="keyword!='' and keyfield=='com_title'">
+    			com_title like '%' || #{keyword} || '%'
+    		</if>
+    		<if test="keyword!='' and keyfield=='id'">
+    			id like '%' || #{keyword} || '%'
+    		</if>
+    		<if test="keyword!='' and keyfield=='content'">
+    			content like '%' || #{keyword} || '%'
+    		</if>
+    		<if test="keyword!='' and keyfield=='all'">
+    			com_title like '%' || #{keyword} || '%' or
+    			id like '%' || #{keyword} || '%' or
+    			content like '%' || #{keyword} || '%' or
+    		</if>
+    	</where>
+    </select>
+    
+    <!-- 글 목록 또는 검색 목록 -->
+    <select id="selectList" parameterType="map" resultType="complimentDTO">
+    	SELECT
+    	   *
+    	FROM (SELECT
+    	        a.*,
+    	        rownum rnum
+    	      FROM (SELECT
+    	             *  
+    	            FROM compliment
+    	            <where>
+			    		<if test="keyword!='' and keyfield=='com_title'">
+			    			com_title like '%' || #{keyword} || '%'
+			    		</if>
+			    		<if test="keyword!='' and keyfield=='id'">
+			    			id like '%' || #{keyword} || '%'
+			    		</if>
+			    		<if test="keyword!='' and keyfield=='content'">
+			    			content like '%' || #{keyword} || '%'
+			    		</if>
+			    		<if test="keyword!='' and keyfield=='all'">
+			    			com_title like '%' || #{keyword} || '%' or
+			    			id like '%' || #{keyword} || '%' or
+			    			content like '%' || #{keyword} || '%' or
+			    		</if>
+			    	</where>
+    	            ORDER BY com_num DESC)a)
+        <![CDATA[
+        WHERE rnum >= #{start} AND rnum <= #{end}
+        ]]>	      
+    </select>
+    
+    <!-- 글 상세 -->
+    <select id="selectCompliment" parameterType="integer" resultType="complimentDTO">
+    	SELECT
+    	   *
+    	FROM compliment
+    	WHERE com_num = #{com_num}
+    </select>
+        <!-- 수정폼 -->
+    <select id="getCom" parameterType="integer" resultType="complimentDTO">
+    	SELECT
+    	   *
+    	FROM compliment
+    	WHERE com_num = #{com_num}
+    </select>
+    <!-- 글 조회수 -->
+    <update id="updatecom_hit" parameterType="integer">
+    	UPDATE compliment
+    	SET com_hit = com_hit + 1
+    	WHERE com_num = #{com_num}
+    </update>
+    <!--  회원 정보 수정 -->
+	<update id="updatecom" parameterType="complimentDTO">
+	UPDATE compliment
+	SET
+	com_title=#{com_title},
+	com_content=#{com_content}
+	WHERE com_num=#{com_num}
+	</update>
+	
+	<!--  회원 정보 삭제 -->
+	<delete id="deletecom" parameterType="Integer">
+	DELETE FROM compliment
+	WHERE com_num=#{com_num}
+	</delete>
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

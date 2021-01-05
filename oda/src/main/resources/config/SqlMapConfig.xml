@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "HTTP://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+	<typeAliases>
+	    <typeAlias alias="memberDTO" type="kr.spring.member.domain.MemberDTO"/>
+	    <typeAlias alias="requestDTO" type="kr.spring.request.domain.RequestDTO"/>
+	    <typeAlias alias="message_requestDTO" type="kr.spring.message_request.domain.Message_requestDTO"/>
+	    <typeAlias alias="requestReplyDTO" type="kr.spring.request.domain.RequestReplyDTO"/>
+	    <typeAlias alias="complimentDTO" type="kr.spring.compliment.domain.ComplimentDTO"/>
+		<typeAlias alias="blackDTO" type="kr.spring.blacklist.domain.BlackDTO"/>
+		<typeAlias alias="noticeDTO" type="kr.spring.notice.domain.NoticeDTO"/>
+		<typeAlias alias="pointDTO" type="kr.spring.point.domain.PointDTO"/>
+	</typeAliases>
+	
+	<mappers>
+		<mapper resource="kr/spring/member/dao/MemberMapper.xml"/>
+		<mapper resource="kr/spring/request/dao/RequestMapper.xml"/>
+		<mapper resource="kr/spring/message_request/dao/Message_requestMapper.xml"/>
+		<mapper resource="kr/spring/compliment/dao/ComplimentMapper.xml"/>
+		<mapper resource="kr/spring/blacklist/dao/BlackMapper.xml"/>
+		<mapper resource="kr/spring/notice/dao/NoticeMapper.xml"/>
+		<mapper resource="kr/spring/point/dao/PointMapper.xml"/>
+	</mappers>
+</configuration>
